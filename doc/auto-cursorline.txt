@@ -1,0 +1,132 @@
+*auto-cursorline.txt*	enable/disable cursorline automatically
+
+Author: delphinus
+Licence: MIT
+
+CONTENTS					      *auto-cursorline-contents*
+
+Introduction		|auto-cursorline-introduction|
+Install			|auto-cursorline-install|
+Configuration		|auto-cursorline-configuration|
+Functions		|auto-cursorline-functions|
+Variables		|auto-cursorline-variables|
+Information		|auto-cursorline-information|
+
+
+==============================================================================
+INTRODUCTION					  *auto-cursorline-introduction*
+
+This plugin manages the |'cursorline'| option to show only when you need. It
+shows / hides in these cases below.
+
+NOTE: This plugin is for Neovim (>= 0.7.0) only.
+NOTE: This is a Lua version of vim-auto-cursorline.
+      See https://github.com/delphinus/vim-auto-cursorline
+
+* When it shows
+  - opening buffers
+  - moving into another window
+  - holding the cursor in a certain wait (customizable)
+
+* When it hides
+  - moving the cursor
+
+
+==============================================================================
+INSTALL						       *auto-cursorline-install*
+
+In case, you use |packer.nvim|.
+>
+    require("packer").startup(function()
+      use {
+        "delphinus/auto-cursorline.nvim",
+        config = function()
+          require("auto-cursorline").setup {}
+        end,
+      }
+    end)
+
+Or, clone the repository to your |packpath| and call *setup()* in |init.lua|.
+>
+    require("auto-cursorline").setup {}
+
+
+==============================================================================
+CONFIGURATION					 *auto-cursorline-configuration*
+
+wait_ms					 *auto-cursorline-configuration-wait_ms*
+
+Milliseconds to wait before hiding |cursorline|. Default: 1000
+>
+    require("auto-cursorline").setup {
+      -- Wait 4000ms for hiding cursorline.
+      wait_ms = 4000,
+    }
+
+
+==============================================================================
+FUNCTIONS					     *auto-cursorline-functions*
+
+enable()			      	      *auto-cursorline-functions-enable*
+
+Enable features and remove settings for the current buffer.
+>
+    -- Enable globally.
+    require("auto-cursorline").enable()
+
+disable(opt)				     *auto-cursorline-functions-disable*
+
+Disable features. With *buffer* option, you can disable on any specified buffer
+only.
+
+In addition to this, it already disables all features for |terminal| windows.
+>
+    -- Disable globally.
+    require("auto-cursorline").disable()
+
+    -- Disable on the current buffer only
+    require("auto-cursorline").disable {
+      buffer = true,
+    }
+
+    -- You can set bufnr for this.
+    require("auto-cursorline").disable {
+      buffer = 42,
+    }
+
+
+==============================================================================
+VARIABLES					     *auto-cursorline-variables*
+
+			  *auto-cursorline-variables-b_auto_cursorline_disabled*
+b:auto_cursorline_disabled
+
+This is for backward compatibility for vim-auto-cursorline.
+
+https://github.com/delphinus/vim-auto-cursorline
+
+
+==============================================================================
+INFORMATION					   *auto-cursorline-information*
+
+Why is this plugin needed? ~
+
+(details in https://qiita.com/delphinus/items/a05f6f21dd494bad9f25 )
+
+The |'cursorline'| option takes heavy CPU usage and makes the cursor move slowly.
+In addition, you should need |'cursorline'| only when you are missing the cursor.
+Hiding |'cursorline'| should make it easy to read characters on the line.
+
+
+Background ~
+
+The idea of this plugin is derived from this entry below:
+https://thinca.hatenablog.com/entry/20090530/1243615055
+One of the reason why I did “reinventing the wheel” is because the original one
+uses the |'updatetime'| option to wait before hiding |'cursorline'|. But other
+plugins, such as vim-gitgutter https://github.com/airblade/vim-gitgutter uses
+|'updatetime'| for different usages. I made this plugin for setting the
+designated value for the time before hiding the |'cursorline'|.
+
+
+vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl
