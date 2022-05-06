@@ -68,14 +68,14 @@ Milliseconds to wait before hiding |cursorline|. Default: `1000`
 ==============================================================================
 FUNCTIONS					     *auto-cursorline-functions*
 
-				      	      *auto-cursorline-functions-enable*
+					      *auto-cursorline-functions-enable*
 enable() ~
 
 Enable features and remove settings for the current buffer.
 >
     -- Enable globally.
     require("auto-cursorline").enable()
-
+<
 					     *auto-cursorline-functions-disable*
 disable() ~
 
