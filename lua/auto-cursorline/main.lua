@@ -132,7 +132,7 @@ end
 function M:is_enabled()
   -- For backward compatibility
   local buffer_disabled = vim.b.auto_cursorline_disabled == true or vim.b.auto_cursorline_disabled == 1
-  return self.enabled and vim.o.buftype ~= "terminal" and not buffer_disabled and true or false
+  return self.enabled and vim.bo.buftype ~= "terminal" and not buffer_disabled and true or false
 end
 
 return M
