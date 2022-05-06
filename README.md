@@ -8,6 +8,7 @@ Show / hide cursorline in connection with cursor moving.
 
 This plugin manages the `'cursorline'` option to show only when you need.
 
+NOTE: This plugin is for Neovim (>= 0.7.0) only.
 NOTE: This is a Lua version of [vim-auto-cursorline][].
 
 [vim-auto-cursorline]: https://github.com/delphinus/vim-auto-cursorline
