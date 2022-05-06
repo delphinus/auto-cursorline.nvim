@@ -123,14 +123,16 @@ end
 function M:disable(opt)
   opt = opt or {}
   if opt.buffer then
-    vim.b.auto_cursorline_disabled = true
+    vim.b.auto_cursorline_disabled = 1
   else
     self.enabled = false
   end
 end
 
 function M:is_enabled()
-  return self.enabled and vim.o.buftype ~= "terminal" and not vim.b.auto_cursorline_disabled and true or false
+  -- For backward compatibility
+  local buffer_disabled = vim.b.auto_cursorline_disabled == true or vim.b.auto_cursorline_disabled == 1
+  return self.enabled and vim.o.buftype ~= "terminal" and not buffer_disabled and true or false
 end
 
 return M
