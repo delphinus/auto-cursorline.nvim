@@ -76,7 +76,10 @@ function M:cursor_moved()
     return
   end
   self:timer_stop()
-  self:timer_start()
+  self.timer = vim.defer_fn(function()
+    self.status = STATUS_CURSOR
+    vim.wo.cursorline = true
+  end, self.wait_ms)
   if self.status == STATUS_CURSOR then
     vim.wo.cursorline = false
     self.status = STATUS_DISABLED
@@ -94,24 +97,10 @@ function M:win_leave()
   self:timer_stop()
 end
 
-function M:timer_start()
-  self.timer = uv.new_timer()
-  self.timer:start(self.wait_ms, 0, function()
-    self.timer:stop()
-    self.timer:close()
-    self.timer = nil
-    self.status = STATUS_CURSOR
-    vim.schedule(function()
-      vim.wo.cursorline = true
-    end)
-  end)
-end
-
 function M:timer_stop()
-  if self.timer then
+  if self.timer and uv.is_active(self.timer) then
     self.timer:stop()
     self.timer:close()
-    self.timer = nil
   end
 end
 
