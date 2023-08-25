@@ -1,11 +1,13 @@
 local main = require("auto-cursorline.main").new()
 
-local function setup(opt)
-  main:setup(opt)
+---@param opts AutoCursorlineConfig?
+local function setup(opts)
+  main:setup(opts)
 end
 
-local function disable()
-  main:disable()
+---@param opts AutoCursorlineDisableConfig?
+local function disable(opts)
+  main:disable(opts)
 end
 
-return { setup = setup, disable = disable }
+return { setup = setup, disable = disable, main = main }

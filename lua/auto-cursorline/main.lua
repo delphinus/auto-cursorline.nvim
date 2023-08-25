@@ -10,51 +10,55 @@ local STATUS_DISABLED = 0
 local STATUS_CURSOR = 1
 local STATUS_WINDOW = 2
 
-local uv = vim.loop
-local api = setmetatable({ _cache = {} }, {
-  __index = function(self, name)
-    if not self._cache[name] then
-      local func = vim.api["nvim_" .. name]
-      if func then
-        self._cache[name] = func
-      else
-        error("Unknown api func: " .. name, 2)
-      end
-    end
-    return self._cache[name]
-  end,
-})
+local uv = vim.uv or vim.loop
 
-local M = {}
+---@class AutoCursorline
+---@field private wait_ms integer
+---@field private status 0|1|2
+---@field private enabled boolean
+---@field private augroup_id integer?
+---@field private timer uv_timer_t
+---@field private disabled_buffers table<integer,boolean>
+local AutoCursorline = {}
 
-function M.new()
+---@return AutoCursorline
+function AutoCursorline.new()
   return setmetatable({
     wait_ms = 1000,
     status = STATUS_DISABLED,
     enabled = true,
     augroup_id = nil,
     timer = nil,
-  }, { __index = M })
+    disabled_buffers = {},
+  }, { __index = AutoCursorline })
 end
 
-function M:setup(opt)
-  opt = opt or {}
-  if opt.wait_ms then
-    self.wait_ms = opt.wait_ms
-  end
-  self:setup_events(opt.force)
+---@class AutoCursorlineConfig
+---@field wait_ms integer default: 1000
+---@field auto boolean default: true
+
+---@param opts AutoCursorlineConfig?
+---@return nil
+function AutoCursorline:setup(opts)
+  local config = vim.tbl_extend("force", { wait_ms = 1000, auto = true }, opts or {})
+  self.wait_ms = config.wait_ms
+  self:setup_events(config.auto)
   self.status = STATUS_CURSOR
   vim.wo.cursorline = true
 end
 
-function M:setup_events(force)
-  if self.augroup_id and not force then
+---@param auto boolean
+---@return nil
+function AutoCursorline:setup_events(auto)
+  if self.augroup_id and not auto then
     return
   end
-  self.augroup_id = api.create_augroup("auto-cursorline", {})
+  self.augroup_id = vim.api.nvim_create_augroup("auto-cursorline", {})
 
+  ---@param events string[]
+  ---@param method string
   local function create_au(events, method)
-    api.create_autocmd(events, {
+    vim.api.nvim_create_autocmd(events, {
       group = self.augroup_id,
       desc = "call auto-cursorline:" .. method .. "()",
       callback = function()
@@ -70,7 +74,8 @@ function M:setup_events(force)
   create_au({ "WinLeave" }, "win_leave")
 end
 
-function M:cursor_moved()
+---@return nil
+function AutoCursorline:cursor_moved()
   if self.status == STATUS_WINDOW then
     self.status = STATUS_CURSOR
     return
@@ -86,42 +91,58 @@ function M:cursor_moved()
   end
 end
 
-function M:win_enter()
+---@return nil
+function AutoCursorline:win_enter()
   vim.wo.cursorline = true
   self.status = STATUS_WINDOW
   self:timer_stop()
 end
 
-function M:win_leave()
+---@return nil
+function AutoCursorline:win_leave()
   vim.wo.cursorline = false
   self:timer_stop()
 end
 
-function M:timer_stop()
+---@return nil
+function AutoCursorline:timer_stop()
   if self.timer and uv.is_active(self.timer) then
     self.timer:stop()
     self.timer:close()
   end
 end
 
-function M:enable()
-  vim.b.auto_cursorline_disabled = nil
+---@return nil
+function AutoCursorline:enable()
+  self.disabled_buffers = {}
   self.enabled = true
 end
 
-function M:disable(opt)
-  opt = opt or {}
-  if opt.buffer then
-    vim.b.auto_cursorline_disabled = 1
+---@class AutoCursorlineDisableConfig
+---@field buffer (boolean|integer)?
+
+---@param opts AutoCursorlineDisableConfig?
+---@return nil
+function AutoCursorline:disable(opts)
+  if opts and opts.buffer then
+    local buf = type(opts.buffer) == "integer" and opts.buffer or vim.api.nvim_get_current_buf()
+    self.disabled_buffers[buf] = true
   else
     self.enabled = false
   end
 end
 
-function M:is_enabled()
-  -- For backward compatibility
+---@return boolean
+function AutoCursorline:is_enabled()
+  -- NOTE: For backward compatibility
   local buffer_disabled = vim.b.auto_cursorline_disabled == true or vim.b.auto_cursorline_disabled == 1
-  return self.enabled and vim.bo.buftype ~= "terminal" and not buffer_disabled and true or false
+  local buf = vim.api.nvim_get_current_buf()
+  return self.enabled
+      and vim.bo.buftype ~= "terminal"
+      and not self.disabled_buffers[buf]
+      and not buffer_disabled
+      and true
+    or false
 end
 
-return M
+return AutoCursorline
