@@ -36,7 +36,7 @@ NOTE: This is a Lua version of vim-auto-cursorline.
 INSTALL						       *auto-cursorline-install*
 
 In case, you use |packer.nvim|.
->
+>lua
     require("packer").startup(function()
       use {
         "delphinus/auto-cursorline.nvim",
@@ -47,7 +47,7 @@ In case, you use |packer.nvim|.
     end)
 
 Or, clone the repository to your |packpath| and call *setup()* in |init.lua|.
->
+>lua
     require("auto-cursorline").setup {}
 
 
@@ -58,11 +58,17 @@ CONFIGURATION					 *auto-cursorline-configuration*
 wait_ms ~
 
 Milliseconds to wait before hiding |cursorline|. Default: `1000`
->
+>lua
     require("auto-cursorline").setup {
       -- Wait 4000ms for hiding cursorline.
       wait_ms = 4000,
     }
+<
+					    *auto-cursorline-configuration-auto*
+auto ~
+
+Setup |autocmd| automatically. When this is `false`, you should call setup it
+by yourself. Default: `true`
 
 
 ==============================================================================
@@ -72,7 +78,7 @@ FUNCTIONS					     *auto-cursorline-functions*
 enable() ~
 
 Enable features and remove settings for the current buffer.
->
+>lua
     -- Enable globally.
     require("auto-cursorline").enable()
 <
@@ -83,7 +89,7 @@ Disable features. With *buffer* option, you can disable on any specified buffer
 only.
 
 In addition to this, it already disables all features for |terminal| windows.
->
+>lua
     -- Disable globally.
     require("auto-cursorline").disable()
 
@@ -104,7 +110,7 @@ VARIABLES					     *auto-cursorline-variables*
 			  *auto-cursorline-variables-b_auto_cursorline_disabled*
 b:auto_cursorline_disabled ~
 
-This is for backward compatibility for vim-auto-cursorline.
+This is for backward compatibility of vim-auto-cursorline.
 
 https://github.com/delphinus/vim-auto-cursorline
 
